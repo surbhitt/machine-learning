@@ -27,6 +27,8 @@
 #define WIDTH 100
 #define HEIGHT 100
 #define PPM_SCALER 50 
+#define SAMPLE_SIZE 10
+
 typedef float Layer[HEIGHT][WIDTH];  // a 2 dimensional array of floats type of size height*width 
 
 static inline int clampi(int x, int low, int high) {
@@ -88,6 +90,20 @@ void layer_save_as_ppm(Layer layer, const char* filepath) {
 	fclose(f);
 }
 
+void layer_save_as_bin(Layer layer, const char* filepath) {
+	FILE* f = fopen(filepath, "wb");
+	if (f == NULL) {
+		fprintf(stderr, "ERROR: could not open file %s: %m", filepath);
+		exit(1);
+	}
+	fwrite(layer, sizeof(Layer), 1, f);
+	fclose(f);
+}
+
+void layer_load_as_bin(Layer layer, const char* filepath) {
+	assert(0 && "TODO");	
+}
+
 float feed_forward(float inputs[HEIGHT][WIDTH], float weights[WIDTH][HEIGHT]) {
 	
 	float output = 0.0f;
@@ -99,15 +115,33 @@ float feed_forward(float inputs[HEIGHT][WIDTH], float weights[WIDTH][HEIGHT]) {
 	return output;
 }
 
+int rand_range(int low, int high) {
+	assert(low < high);
+	return rand() % (high - low) + low;
+}
+
 static Layer inputs;
-static Layer weights;
 
 int main() {
 	//printf("Hello, subroza!\n");
-	
-	layer_fill_circle(inputs, WIDTH/2, HEIGHT/2, WIDTH/2, 1.0f);
-	layer_save_as_ppm(inputs, "inputs.ppm");
-	//float output = feed_forward(inputs, weights);
-	//printf("output = %f\n", output);
+	char filepath[256];
+	int x, y, w, h;
+	for (int i=0; i<SAMPLE_SIZE; ++i) {
+		printf("[INFO] generating rect %d\n", i);
+		layer_fill_rect(inputs, 0, 0, WIDTH, HEIGHT, 0.0f);
+		x = rand_range(0, WIDTH); 
+		y = rand_range(0, HEIGHT);
+		w = rand_range(1, WIDTH);
+		h = rand_range(1, HEIGHT);
+		layer_fill_rect(inputs, x, y, w, h, 1.0f);
+		snprintf(filepath, sizeof(filepath), "assets/rect-%02d.bin", i);
+		layer_save_as_bin(inputs, filepath);
+		snprintf(filepath, sizeof(filepath), "assets/rect-%02d.ppm", i);
+		layer_save_as_ppm(inputs, filepath);
+	}
+	// layer_fill_circle(inputs, WIDTH/2, HEIGHT/2, WIDTH/2, 1.0f);
+	// layer_save_as_ppm(inputs, "inputs.ppm");
+	// float otuput = feed_forward(inputs, weights);
+	// printf("output = %f\n", output);
 	return 0;
 }
