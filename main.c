@@ -12,23 +12,28 @@
    initially all the neurons are 0 weighted
    based on the answer if it is wrong
    if we wanted a 1 and it is 0
-   we add the cell values to the weight: exciting
+   we add the cell values to the weight: excite
    if we wanted a 0 and it is 1
-   we sub the cell values from the weight: suppressing
+   we sub the cell values from the weight: suppress
 */
 // 0 for rectangle and 1 for circle
 
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
 #include <math.h>
 #include <limits.h>
+#include <stdio.h>
+#include <float.h>
 #define WIDTH 100
 #define HEIGHT 100
-#define PPM_SCALER 50 
-#define SAMPLE_SIZE 10
+#define PPM_SCALER 25 
+#define SAMPLE_SIZE 500
+#define BIAS 10.0 
+#define TRAIN_PASSES 100
 
 typedef float Layer[HEIGHT][WIDTH];  // a 2 dimensional array of floats type of size height*width 
 
@@ -72,6 +77,15 @@ void layer_fill_circle(Layer layer, int cx, int cy, int r, float value) {
 }
 
 void layer_save_as_ppm(Layer layer, const char* filepath) {
+	float min = FLT_MAX;
+	float max = FLT_MIN;
+	for (int y=0;y<HEIGHT-1;++y) {
+		for (int x=0;x<WIDTH-1;++x) {
+			if (layer[y][x]<min) min = layer[y][x];
+			if (layer[y][x]>max) max = layer[y][x];
+		}
+	}
+
 	FILE* f = fopen(filepath, "wb");
 	if (f == NULL) {
 		fprintf(stderr, "ERROR: Invalid file path %s: %m\n", filepath);
@@ -80,9 +94,10 @@ void layer_save_as_ppm(Layer layer, const char* filepath) {
 	fprintf(f, "P6\n%d %d 255\n", WIDTH*PPM_SCALER, HEIGHT*PPM_SCALER);
 	for (int y=0;y<HEIGHT*PPM_SCALER; ++y) {
 		for (int x=0;x<WIDTH*PPM_SCALER; ++x) {
-			float s = layer[y/PPM_SCALER][x/PPM_SCALER];
+			float s = (layer[y/PPM_SCALER][x/PPM_SCALER]-min)/(max-min);
+			
 			char pixel[3] = {
-				(char) floor(255*s), 0, 0
+				(char)floor(255*(1.0f-s)),(char)floor(255*s), 0
 			};
 			fwrite(pixel, sizeof(pixel), 1, f);
 		}
@@ -116,6 +131,22 @@ float feed_forward(float inputs[HEIGHT][WIDTH], float weights[WIDTH][HEIGHT]) {
 		}
 	}
 	return output;
+}
+
+void suppress(Layer inputs, Layer weights){
+	for (int y=0;y<HEIGHT;++y) {
+		for (int x=0;x<WIDTH;++x) {
+			weights[y][x] -= inputs[y][x];
+		}
+	}
+}
+
+void excite(Layer inputs, Layer weights){
+	for (int y=0;y<HEIGHT;++y) {
+		for (int x=0;x<WIDTH;++x) {
+			weights[y][x] += inputs[y][x];
+		}
+	}
 }
 
 int rand_range(int low, int high) {
@@ -152,11 +183,44 @@ void layer_random_circle(Layer layer) {
 	layer_fill_circle(layer, cx, cy, r, 1.0f);
 }
 
+
+int train_pass(Layer inputs, Layer weights) {
+	int adjusted = 0;
+	for (int i=0; i<SAMPLE_SIZE; ++i) {
+		layer_random_rect(inputs);
+		if (feed_forward(inputs, weights) > BIAS) {
+			suppress(inputs, weights);
+			adjusted++;
+		}
+		layer_random_circle(inputs);
+		if (feed_forward(inputs, weights) < BIAS) {
+			excite(inputs, weights);
+			adjusted++;
+		}
+	}
+	return adjusted;
+}
+
 static Layer inputs;
 static Layer weights;
 #define PREFIX "rect"
+
 int main() {
 	//printf("Hello, subroza!\n");
+	for (int i=0;i<TRAIN_PASSES; ++i) {
+
+	srand(60);
+	int adj = train_pass(inputs, weights);
+	printf("%d\n",adj);
+	}	
+	layer_save_as_ppm(weights, "weights.ppm");
+/*
+	do {	
+	srand(60);
+	} while(train_pass(inputs, weights));
+	layer_save_as_ppm(weights, "weights.ppm");
+*/
+#if 0 
 	char filepath[256];
 	for (int i=0; i<SAMPLE_SIZE; ++i) {
 		printf("[INFO] generating "PREFIX" %d\n", i);
@@ -166,6 +230,7 @@ int main() {
 		snprintf(filepath, sizeof(filepath), "assets/"PREFIX"-%02d.ppm", i);
 		layer_save_as_ppm(inputs, filepath);
 	}
+#endif
 	// layer_fill_circle(inputs, WIDTH/2, HEIGHT/2, WIDTH/2, 1.0f);
 	// layer_save_as_ppm(inputs, "inputs.ppm");
 	// float otuput = feed_forward(inputs, weights);
