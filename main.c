@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <math.h>
+#include <limits.h>
 #define WIDTH 100
 #define HEIGHT 100
 #define PPM_SCALER 50 
@@ -100,9 +101,11 @@ void layer_save_as_bin(Layer layer, const char* filepath) {
 	fclose(f);
 }
 
+#ifdef unimplemnted
 void layer_load_as_bin(Layer layer, const char* filepath) {
 	assert(0 && "TODO");	
 }
+#endif
 
 float feed_forward(float inputs[HEIGHT][WIDTH], float weights[WIDTH][HEIGHT]) {
 	
@@ -120,23 +123,47 @@ int rand_range(int low, int high) {
 	return rand() % (high - low) + low;
 }
 
-static Layer inputs;
+void layer_random_rect(Layer layer) {
+	int x, y, w, h;
+	layer_fill_rect(layer, 0, 0, WIDTH, HEIGHT, 0.0f);
+	x = rand_range(0, WIDTH); 
+	y = rand_range(0, HEIGHT);
+	w = WIDTH-x;
+	if (w<2) w=2;
+	w = rand_range(1, w);
+	h = HEIGHT-y;
+	if (h<2) h=2;
+	h = rand_range(1, h);
+	layer_fill_rect(layer, x, y, w, h, 1.0f);
+}
 
+void layer_random_circle(Layer layer) {
+	int cx, cy, r;
+	layer_fill_rect(layer, 0, 0, WIDTH, HEIGHT, 0.0f);
+	cx = rand_range(0, WIDTH); 
+	cy = rand_range(0, HEIGHT);
+	r = INT_MAX;
+	if (r>cx) r = cx;
+	if (r>cy) r = cy;
+	if (r> WIDTH-cx) r = WIDTH-cx;
+	if (r> HEIGHT-cy) r = HEIGHT-cy;
+	if (r<2) r=2;
+	r = rand_range(1, r);
+	layer_fill_circle(layer, cx, cy, r, 1.0f);
+}
+
+static Layer inputs;
+static Layer weights;
+#define PREFIX "rect"
 int main() {
 	//printf("Hello, subroza!\n");
 	char filepath[256];
-	int x, y, w, h;
 	for (int i=0; i<SAMPLE_SIZE; ++i) {
-		printf("[INFO] generating rect %d\n", i);
-		layer_fill_rect(inputs, 0, 0, WIDTH, HEIGHT, 0.0f);
-		x = rand_range(0, WIDTH); 
-		y = rand_range(0, HEIGHT);
-		w = rand_range(1, WIDTH);
-		h = rand_range(1, HEIGHT);
-		layer_fill_rect(inputs, x, y, w, h, 1.0f);
-		snprintf(filepath, sizeof(filepath), "assets/rect-%02d.bin", i);
+		printf("[INFO] generating "PREFIX" %d\n", i);
+		layer_random_rect(inputs);
+		snprintf(filepath, sizeof(filepath), "assets/"PREFIX"-%02d.bin", i);
 		layer_save_as_bin(inputs, filepath);
-		snprintf(filepath, sizeof(filepath), "assets/rect-%02d.ppm", i);
+		snprintf(filepath, sizeof(filepath), "assets/"PREFIX"-%02d.ppm", i);
 		layer_save_as_ppm(inputs, filepath);
 	}
 	// layer_fill_circle(inputs, WIDTH/2, HEIGHT/2, WIDTH/2, 1.0f);
