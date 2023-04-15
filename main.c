@@ -207,13 +207,14 @@ static Layer weights;
 
 int main() {
 	//printf("Hello, subroza!\n");
+	char filepath[256];
 	for (int i=0;i<TRAIN_PASSES; ++i) {
-
-	srand(60);
-	int adj = train_pass(inputs, weights);
-	printf("%d\n",adj);
+		srand(60);
+		int adj = train_pass(inputs, weights);
+		printf("weights adjusted %d\n",adj);
+		snprintf(filepath, sizeof(filepath), "assets/gif/weight-%02d.ppm", i);
+		layer_save_as_ppm(weights, filepath);
 	}	
-	layer_save_as_ppm(weights, "weights.ppm");
 /*
 	do {	
 	srand(60);
