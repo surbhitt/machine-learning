@@ -19,7 +19,8 @@ The following is a gif demostrating the changes in the weight value during a tra
 
 <img src="assets/modelwt100.gif" height="50%" width="50%">
 
-<img src="assets/modelwt100.gif" height="50%" width="50%">
+<img src="assets/modelwt100100.gif" height="50%" width="50%">
+
 # Build
 ```console
 ./build.sh
