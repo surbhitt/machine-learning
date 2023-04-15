@@ -17,8 +17,6 @@ This is the weight of a model trained off a 100 object sample space. It is rende
 
 The following is a gif demostrating the changes in the weight value during a training pass.
 
-<img src="assets/modelwt100.gif" height="50%" width="50%">
-
 <img src="assets/modelwt100100.gif" height="50%" width="50%">
 
 # Build
