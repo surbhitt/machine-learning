@@ -8,10 +8,13 @@ The layer of neuraons are a grid of float values representing their respective w
 
 The following are the example for the trainining data generated
 
-Circle                    | Rectangle   
+<img src="assets/circ.png" height="30%" width="30%">
+<img src="assets/rect.png" height="30%" width="30%">
+
+<!--Circle                    | Rectangle   
 :------------------------:|:----------------------------:
 ![circle](assets/circ.png)|![rectangle](assets/rect.png)
-
+-->
 
 # Weight
 
