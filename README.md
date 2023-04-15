@@ -6,6 +6,13 @@ This a very basic neural network written in C. The objective of the system is to
 
 The layer of neuraons are a grid of float values representing their respective weights. The pixel value of each image containing a circle or a rectangle is multiplied with the respective neurons weight and all those are summed up and compared against a bias value if the summation value is more than the bias this indicates a cricle and hence 1 is returned, 1 is used just for indicative purposes. If the result is incorrect the weights are corrected i.e. if a 1 was expected and a 0 is returned the neurons need to be excited, simply add the pixel values to the weight in the opposite case the neurons need to be suppressed and hence we subtract the pixel values.
 
+The following are the example for the trainining data generated
+
+Circle                    | Rectangle   
+:------------------------:|:----------------------------:
+![circle](assets/circ.png)|![rectangle](assets/rect.png)
+
+
 # Weight
 
 <img src="assets/modelwt100.jpg" height="50%" width="50%">
