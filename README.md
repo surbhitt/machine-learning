@@ -10,8 +10,7 @@ The following are the example for the trainining data generated
 
 |Circle                   | Rectangle   				|
 :------------------------:|:----------------------------:
-<img src="assets/circ.png" height="30%" width="30%">
-|<img src="assets/rect.png" height="30%" width="30%">
+|<img src="assets/circ.png" height="30%" width="30%">|<img src="assets/rect.png" height="30%" width="30%">|
 
 # Weight
 
